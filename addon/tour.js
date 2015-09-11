@@ -34,12 +34,28 @@ export default Em.Component.extend({
     /**
     * Add padding to the step being currently highligted
     **/
-    'backdrop-padding': 0,
+    'backdrop-padding': 2,
 
     /**
     * An array of objects representing the steps to be included in the tour.
     **/
     steps: [],
+
+    /**
+    * Set a expiration time for the steps. When the current step expires, the next step is automatically shown.
+    * See it as a sort of guided, automatized tour functionality. The value is specified in milliseconds
+    **/
+    duration: 4000,
+
+    /**
+    * This option set the left and right arrow navigation.own.
+    **/
+    keyboard: true,
+
+    /**
+    * Autoscrolls the window when the step popover is out of view.
+    **/
+    autoscroll: true,
 
     /**
     * The bootstrap tour object
@@ -97,6 +113,9 @@ export default Em.Component.extend({
             steps: get(this, 'steps'),
             orphan: get(this, 'orphan'),
             backdrop: get(this, 'backdrop'),
+            duration: get(this, 'duration'),
+            keyboard: get(this, 'keyboard'),
+            autoscroll: get(this, 'autoscroll'),
             backdropPadding: get(this, 'backdrop-padding'),
             component: this,
             onShow: function(tour) {
@@ -129,16 +148,16 @@ export default Em.Component.extend({
             },
             onEnd: function(tour) {
                 var comp = tour._options.component;
+                comp.set('start-if', undefined);
                 comp.sendAction('on-end', comp, tour, this);
             }
         });
         this.set('tour', tour);
-    }.on('didInsertElement'),
+    }.observes('name', 'steps', 'orphan', 'backdrop', 'duration', 'keyboard', 'autoscroll', 'backdrop-padding').on('didInsertElement'),
 
-    observeStartIf: function() {
-        if (this.get('start-if')) {
-            this.get('tour').restart();
-            this.set('start-if', undefined);
-        }
-    }.observes('start-if')
+    observeStartTour: function() {
+      if (this.get('start-if')) {
+        this.get('tour').restart();
+      }
+    }.observes('tour', 'start-if')
 });
